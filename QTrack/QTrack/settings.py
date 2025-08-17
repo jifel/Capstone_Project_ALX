@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cd!lr^7p7_962qn!-@+374agdxk067r!=4he&^g_rfh(2)k8!b'
+SECRET_KEY = 'django-insecure-r2cp-b$h1re$2nwoxzn)j^edh(gpe0o05r^likar*@-f&ygv26'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #my local apps (project modules)
+    # tracker  -> issue + comment models, views, templates
+    # users    -> using Django's default for now
+    # api      -> DRF endpoints in Week 3
+    # core     -> shared helpers/utilities (optional)
+    "tracker",
+    "users",
+    "api",
+    "core",
 ]
 
 MIDDLEWARE = [
