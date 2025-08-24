@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p>Total Issues: {{ total_issues }}</p>
+    <p>Open Issues: {{ open_issues }}</p>
+    <p>Closed Issues: {{ closed_issues }}</p>
+    <a href="{% url 'issue_list' %}">View All Issues</a>
+</body>
+</html>

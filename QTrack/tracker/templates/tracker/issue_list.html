@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue List</title>
+</head>
+<body>
+    <h1>All Issues</h1>
+    <ul>
+        {% for issue in issues %}
+            <li>
+                <a href="{% url 'issue_detail' issue.id %}">
+                    {{ issue.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
