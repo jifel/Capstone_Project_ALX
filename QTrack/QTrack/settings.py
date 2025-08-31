@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = 'dashboard'   # or reverse('dashboard')
+#redirect after logout/login
+LOGIN_REDIRECT_URL = reverse_lazy("dashboard")   # or reverse('dashboard')
+LOGOUT_REDIRECT_URL = reverse_lazy("splash")  # redirect to splash page after logout
+
 
 # Application definition
 
@@ -47,7 +51,22 @@ INSTALLED_APPS = [
     "users",
     "api",
     "core",
+
+    #api
+    'rest_framework',
 ]
+
+REST_FRAMEWORK = {
+    # Enable filtering support 
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    # Enable pagination so large querysets are broken into smaller pages
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+
+    # Number of results per page (you can adjust this as needed)
+    'PAGE_SIZE': 10,
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

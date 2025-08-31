@@ -1,14 +1,54 @@
 {% extends "base.html" %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    <p>Total Issues: {{ total_issues }}</p>
-    <p>Open Issues: {{ open_issues }}</p>
-    <p>Closed Issues: {{ closed_issues }}</p>
-    <a href="{% url 'issue_list' %}">View All Issues</a>
-</body>
-</html>
+
+{% block title %}Dashboard | QTrack{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Dashboard</h2>
+
+    <div class="row g-4">
+        <!-- Total Issues -->
+        <div class="col-sm-6 col-md-4">
+            <div class="card text-white bg-primary shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Issues</h5>
+                    <p class="card-text display-6 fw-bold">{{ total_issues }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Issues -->
+        <div class="col-sm-6 col-md-4">
+            <div class="card text-white bg-success shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Open Issues</h5>
+                    <p class="card-text display-6 fw-bold">{{ open_issues }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closed Issues -->
+        <div class="col-sm-6 col-md-4">
+            <div class="card text-white bg-secondary shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Closed Issues</h5>
+                    <p class="card-text display-6 fw-bold">{{ closed_issues }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-5">
+        <h4 class="mb-3">Quick Actions</h4>
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'issue_create' %}" class="btn btn-outline-primary btn-lg">
+                + Add New Issue
+            </a>
+            <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
+                View All Issues
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

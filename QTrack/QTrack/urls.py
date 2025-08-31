@@ -20,8 +20,12 @@ from tracker import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include('core.urls')), #core (dashboard, homepage)
-    path('issues', include('tracker.urls')), #include tracker app routes (issues, etc)
+    path('issues/', include('tracker.urls')), #include tracker app routes (issues, etc)
     path('accounts/', include('users.urls')), # include users app routes (authentication, profiles)
-    #path('api/', include('api.urls')), # for exposing the api endpoints
+    path('api/', include('api.urls')), # for exposing the api endpoints
+
+
+    #root routes
+    path("", views.splash, name="splash"), #splash page for logout
+    path("dashboard/", views.dashboard, name="dashboard"), #dashboard after login
 ]
