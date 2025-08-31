@@ -1,43 +1,41 @@
-{% extends "base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QTrack - Welcome</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-600 to-purple-700 h-screen flex items-center justify-center">
 
-{% block content %}
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
-            Welcome to QTrack
-        </h2>
-        <p class="text-center text-gray-500 mb-6">
-            Log in to continue tracking issues efficiently 🚀
-        </p>
+  <div class="bg-white shadow-2xl rounded-3xl p-12 max-w-lg w-full text-center">
+    <!-- Logo / Title -->
+    <h1 class="text-5xl font-extrabold text-gray-800 mb-4">QTrack</h1>
+    <p class="text-lg text-gray-600 mb-8">
+      Your reliable Quality & Issue Tracking System
+    </p>
 
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            
-            <!-- Render Django form fields with Tailwind styling -->
-            {% for field in form %}
-                <div>
-                    <label class="block text-gray-600 text-sm mb-1">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
+    <!-- Illustration -->
+    <img src="{% static 'images/analytics.svg' %}" 
+         alt="QTrack Illustration" 
+         class="mx-auto mb-10 w-56">
 
-            <!-- Submit Button -->
-            <button type="submit"
-                class="w-full py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
-                Log In
-            </button>
-        </form>
+    <!-- Action Buttons -->
+    <div class="space-y-4">
+      <a href="{% url 'signup' %}"
+         class="block w-full py-4 rounded-xl bg-green-600 text-white font-semibold shadow-md hover:bg-green-700 transition text-lg">
+        Create an Account
+      </a>
 
-        <p class="text-center text-gray-500 text-sm mt-6">
-            Don’t have an account?
-            <a href="{% url 'signup' %}" class="text-indigo-600 font-medium hover:underline">
-                Sign up
-            </a>
-        </p>
+      <a href="{% url 'login' %}"
+         class="block w-full py-4 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition text-lg">
+        Log In
+      </a>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Footer -->
+    <p class="text-xs text-gray-400 mt-8">© 2025 QTrack. All rights reserved.</p>
+  </div>
+
+</body>
+</html>

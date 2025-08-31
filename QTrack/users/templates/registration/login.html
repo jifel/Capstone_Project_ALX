@@ -1,51 +1,57 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - QTrack</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-600 to-purple-700 h-screen flex items-center justify-center">
 
-{% block title %}Log In | QTrack{% endblock %}
+  <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-md w-full text-center">
+    <!-- Logo -->
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-3">QTrack</h1>
+    <p class="text-gray-500 mb-6">Log in to your account</p>
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-lg border-0 rounded-3">
-            <div class="card-body p-4">
-                <!-- Header -->
-                <h3 class="text-center fw-bold mb-2">Welcome Back</h3>
-                <p class="text-center text-muted mb-4">
-                    Log in to continue managing your tasks 🚀
-                </p>
+    <!-- Illustration -->
+    <img src="{% static 'images/analytics.svg' %}" alt="QTrack Illustration" class="mx-auto mb-6 w-40">
 
-                <!-- Login Form -->
-                <form method="post">
-                    {% csrf_token %}
+    <!-- Login Form -->
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
 
-                    <!-- Username -->
-                    <div class="mb-3">
-                        <label for="id_username" class="form-label">Username</label>
-                        <input type="text" name="username" autofocus required
-                               class="form-control" id="id_username">
-                    </div>
-
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="id_password" class="form-label">Password</label>
-                        <input type="password" name="password" required
-                               class="form-control" id="id_password">
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            Log In
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Signup link -->
-                <p class="text-center mt-3">
-                    Don’t have an account? 
-                    <a href="{% url 'signup' %}" class="fw-bold text-decoration-none">Sign up</a>
-                </p>
-            </div>
+      <!-- 🔴 Show non-field errors (like wrong password) -->
+      {% if form.non_field_errors %}
+        <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm">
+          {{ form.non_field_errors|join:", " }}
         </div>
-    </div>
-</div>
-{% endblock %}
+      {% endif %}
+
+      {% for field in form %}
+        <div class="text-left">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-red-500 text-sm">{{ field.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit"
+              class="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition">
+        Log In
+      </button>
+    </form>
+
+    <!-- Signup Link -->
+    <p class="text-sm text-gray-500 mt-6">
+      Don’t have an account?
+      <a href="{% url 'signup' %}" class="text-blue-600 font-semibold hover:underline">Sign up</a>
+    </p>
+
+    <!-- Footer -->
+    <p class="text-xs text-gray-400 mt-6">© 2025 QTrack. All rights reserved.</p>
+  </div>
+
+</body>
+</html>
