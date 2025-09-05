@@ -1,9 +1,7 @@
 from django.db import models
+from django.conf import settings
 
-# Create your models here.
 # tracker/models.py
-from django.db import models
-from django.contrib.auth.models import User  # Using Django's built-in User for simplicity
 
 class Issue(models.Model):
     """
@@ -51,14 +49,14 @@ class Issue(models.Model):
 
     # Who reported the issue (QA). If the user is deleted, delete their issues too.
     reporter = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="reported_issues",
     )
 
     # Which developer is assigned (optional). If the user is deleted, keep the issue but set to NULL.
     assignee = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -97,7 +95,7 @@ class Comment(models.Model):
 
     # Who wrote the comment
     author = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
 

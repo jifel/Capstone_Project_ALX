@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-r2cp-b$h1re$2nwoxzn)j^edh(gpe0o05r^likar*@-f&ygv26
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['jifel.pythonanywhere.com','localhost', '127.0.0.1']
 
 #redirect after logout/login
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard")   # or reverse('dashboard')
@@ -167,3 +167,6 @@ else:
     CSRF_COOKIE_SECURE = False
     SECURE_SSL_REDIRECT = False
 
+
+#user this custom user model instead of django's default
+AUTH_USER_MODEL = 'users.CustomUser'
