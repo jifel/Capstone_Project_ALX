@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from .forms import AssignIssueForm
 from .models import Issue
-from .forms import IssueForm
+from .forms import IssueForm, CommentForm
 import csv
 from django.http import HttpResponse
 
@@ -52,20 +52,61 @@ def issue_list(request):
 
 
 #view to show details of one issue
+
+@login_required
 def issue_detail(request, pk):
     issue = get_object_or_404(Issue, pk=pk)
 
-    # Check role or group membership in Python (cleaner than template logic)
+    # Role checks
     is_qa = (
         getattr(request.user, "role", None) in ["qa", "admin"]
         or request.user.groups.filter(name__in=["QA", "Admin"]).exists()
     )
 
-    return render(
-        request,
-        "tracker/issue_detail.html",
-        {"issue": issue, "is_qa": is_qa}
+    can_update_status = is_qa
+    can_comment = (
+        request.user == issue.assignee or is_qa
     )
+
+    # Initialize empty comment form
+    comment_form = CommentForm()
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        # Status update only
+        if action == "status_update" and can_update_status:
+            new_status = request.POST.get("status")
+            if new_status in dict(Issue.STATUS_CHOICES):
+                issue.status = new_status
+                issue.save()
+            return redirect('issue_detail', pk=issue.pk)
+
+        # Add comment only
+        elif action == "add_comment" and can_comment:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.issue = issue
+                comment.author = request.user
+                comment.save()
+            return redirect('issue_detail', pk=issue.pk)
+
+        else:
+            raise PermissionDenied("You cannot perform this action.")
+
+    # Pass all comments to template
+    comments = issue.comments.all()
+
+    context = {
+        "issue": issue,
+        "is_qa": is_qa,
+        "can_update_status": can_update_status,
+        "can_comment": can_comment,
+        "comments": comments,
+        "comment_form": comment_form,
+    }
+    return render(request, "tracker/issue_detail.html", context)
 
 
 

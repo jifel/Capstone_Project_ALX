@@ -1,19 +1,111 @@
 {% extends "base.html" %}
 
-{% block title %}Issue Details{% endblock %}
+{% block title %}Issue Details | QTrack{% endblock %}
 
 {% block content %}
-  <h2>{{ issue.title }}</h2>
-  <p>{{ issue.description }}</p>
-  <p>Status: {{ issue.status }}</p>
-  <p>Priority: {{ issue.priority }}</p>
-  <p>Reporter: {{ issue.reporter }}</p>
-  <p>Assignee: {{ issue.assignee|default:"Unassigned" }}</p>
+<div class="container py-4">
 
-  {% if user.is_authenticated and is_qa %}
-    <!-- Only QA/Admins see this -->
-    <a href="{% url 'issue_assign' issue.pk %}" class="btn btn-primary">
-      Assign Issue
-    </a>
-  {% endif %}
+    <!-- Back to Issues Button -->
+    <div class="mb-3">
+        <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary">
+            ← Back to Issues
+        </a>
+    </div>
+
+    <!-- Issue Info Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="card-title fw-bold">{{ issue.title }}</h2>
+            <p class="card-text">{{ issue.description }}</p>
+
+            <div class="row g-3 mt-3">
+                <!-- Status -->
+                <div class="col-md-3">
+                    <strong>Status:</strong><br>
+                    {% if can_update_status %}
+                        <form method="post" class="d-flex align-items-center">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="status_update">
+                            <select name="status" class="form-select me-2">
+                                {% for value, label in issue.STATUS_CHOICES %}
+                                    <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                        </form>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ issue.get_status_display }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Priority -->
+                <div class="col-md-3">
+                    <strong>Priority:</strong><br>
+                    {% if issue.priority == "critical" %}
+                        <span class="badge bg-dark">Critical</span>
+                    {% elif issue.priority == "high" %}
+                        <span class="badge bg-danger">High</span>
+                    {% elif issue.priority == "medium" %}
+                        <span class="badge bg-warning text-dark">Medium</span>
+                    {% else %}
+                        <span class="badge bg-info text-dark">Low</span>
+                    {% endif %}
+                </div>
+
+                <!-- Reporter -->
+                <div class="col-md-3">
+                    <strong>Reporter:</strong><br>
+                    {{ issue.reporter.username }}
+                </div>
+
+                <!-- Assignee -->
+                <div class="col-md-3">
+                    <strong>Assignee:</strong><br>
+                    {{ issue.assignee.username|default:"Unassigned" }}
+                </div>
+            </div>
+
+            <!-- Assign Button (QA/Admin only) -->
+            {% if is_qa %}
+                <div class="mt-3">
+                    <a href="{% url 'issue_assign' issue.pk %}" class="btn btn-primary">
+                        Assign Issue
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Comments</h5>
+        </div>
+        <div class="card-body">
+
+            {% for comment in comments %}
+                <div class="border rounded p-3 mb-2">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted">({{ comment.timestamp|date:"Y-m-d H:i" }})</small>
+                    <p class="mb-0">{{ comment.message }}</p>
+                </div>
+            {% empty %}
+                <p class="text-muted">No comments yet.</p>
+            {% endfor %}
+
+            {% if can_comment %}
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_comment">
+                    {{ comment_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                </form>
+            {% else %}
+                <p class="text-muted mt-2">You cannot comment on this issue.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Issue
+from .models import Issue, Comment
 from django.conf import settings
 from django.contrib.auth import get_user_model 
 
@@ -9,11 +9,10 @@ class IssueForm(forms.ModelForm):
         model = Issue
         fields = ['title', 'description', 'status', 'priority']
 
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            for field in self.fields.values():
-                field.widget.attrs.update({"class": "form-control"})
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({"class": "form-control"})
 
 
 
@@ -48,3 +47,20 @@ class AssignIssueForm(forms.ModelForm):
             self.fields['assignee'].queryset = User.objects.filter(id__in=dev_ids)
         else:
             self.fields['assignee'].queryset = User.objects.none()
+
+
+#form view to add comments
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["message"]
+        widgets = {
+            "message": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Add your comment here..."
+            }),
+        }
+        labels = {
+            "message": ""
+        }
