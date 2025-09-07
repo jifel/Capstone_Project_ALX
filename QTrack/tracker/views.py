@@ -14,35 +14,41 @@ from django.http import HttpResponse
 @login_required
 def issue_list(request):
     """
-    Show list of issues with role-based filtering:
-    - QA/Admins see all issues
-    - Developers see only issues assigned to them
+    Issue list view with strict role filtering:
+    - QA/Admin (role='qa' or superuser) see all issues (with optional filters)
+    - Developers (role='dev') see only issues assigned to them
     """
-    issues = Issue.objects.all()
+    user_role = getattr(request.user, "role", "").lower()
+    
+    # Developers: only assigned issues
+    if user_role == "dev":
+        issues = Issue.objects.filter(assignee=request.user)
+    else:
+        # QA/Admin: all issues with optional filters
+        issues = Issue.objects.all()
+        
+        # Apply filters
+        status = request.GET.get("status")
+        priority = request.GET.get("priority")
+        reporter = request.GET.get("reporter")
+        assigned = request.GET.get("assigned")
 
-    # Role-based restriction
-    if getattr(request.user, "role", None) == "developer":
-        issues = issues.filter(assignee=request.user)
+        if status:
+            issues = issues.filter(status=status)
+        if priority:
+            issues = issues.filter(priority=priority)
+        if reporter:
+            issues = issues.filter(reporter__username__icontains=reporter)
+        if assigned == "yes":
+            issues = issues.exclude(assignee__isnull=True)
+        elif assigned == "no":
+            issues = issues.filter(assignee__isnull=True)
 
-    # Apply filters
-    status = request.GET.get("status")
-    priority = request.GET.get("priority")
-    reporter = request.GET.get("reporter")
-    assigned = request.GET.get("assigned")  # <-- NEW
-
-    if status:
-        issues = issues.filter(status=status)
-    if priority:
-        issues = issues.filter(priority=priority)
-    if reporter:
-        issues = issues.filter(reporter__username__icontains=reporter)
-    if assigned == "yes":
-        issues = issues.exclude(assignee__isnull=True)
-    elif assigned == "no":
-        issues = issues.filter(assignee__isnull=True)
-
-    return render(request, "tracker/issue_list.html", {"issues": issues})
-
+    context = {
+        "issues": issues,
+        "user_role": user_role,  # used in template to control buttons/filters
+    }
+    return render(request, "tracker/issue_list.html", context)
 
 
 #view to show details of one issue
@@ -66,6 +72,12 @@ def issue_detail(request, pk):
 #view to create a new issue
 @login_required
 def issue_create(request):
+    #allow only QA/Admin roles
+    if request.user.role not in ["qa", "admin"] and not request.user.groups.filter(
+        name__in=["QA", "Admin"]
+    ).exists():
+        raise PermissionDenied("You are not allowed to create issues.")
+    
     if request.method == 'POST':
         form = IssueForm(request.POST)
         if form.is_valid():
@@ -81,19 +93,23 @@ def issue_create(request):
 #dashboard view - show summary stats(total issues, open issues, closed issues)
 @login_required
 def dashboard(request):
-    user = request.user
+    """
+    Show summary stats for issues.
+    - QA/Admins see all issues
+    - Developers see only issues assigned to them
+    """
+    user_role = getattr(request.user, "role", "").lower()
 
-    if user.role in ["qa", "admin"]:
-        # Global stats for QA and Admin
+    if user_role in ["qa", "admin"]:
         issues = Issue.objects.all()
     else:
-        # Developers only see their assigned issues
-        issues = Issue.objects.filter(assignee=user)
+        issues = Issue.objects.filter(assignee=request.user)
 
     context = {
         "total_issues": issues.count(),
         "open_issues": issues.filter(status="open").count(),
         "closed_issues": issues.filter(status="closed").count(),
+        "user_role": user_role,  # pass role to template for quick actions
     }
     return render(request, "tracker/dashboard.html", context)
 
@@ -194,3 +210,11 @@ def unassigned_issues(request):
         "issues": issues,
     }
     return render(request, "tracker/unassigned_issues.html", context)
+
+@login_required
+def my_issues(request):
+    
+    return redirect('issue_list')
+
+
+

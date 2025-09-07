@@ -42,11 +42,11 @@
     <div class="mt-5">
         <h4 class="mb-3">Quick Actions</h4>
         <div class="d-flex flex-wrap gap-3">
-            <a href="{% url 'issue_create' %}" class="btn btn-outline-primary btn-lg">
-                + Add New Issue
-            </a>
 
-            {% if user.role == "qa" or user.role == "admin" %}
+            {% if user.role in "qa admin" %}
+                <a href="{% url 'issue_create' %}" class="btn btn-outline-primary btn-lg">
+                    + Add New Issue
+                </a>
                 <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
                     View All Issues
                 </a>
@@ -54,10 +54,12 @@
                     Assign Issues
                 </a>
             {% else %}
+                {# Developers only see their assigned issues #}
                 <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
                     View My Issues
                 </a>
             {% endif %}
+
         </div>
     </div>
 </div>

@@ -9,6 +9,9 @@ urlpatterns = [
     # List all issues in a table format
     path("issues/", views.issue_list, name="issue_list"),
 
+    #view my issues
+    path('issues/my/', views.my_issues, name='my_issues'),
+
     # View details of a specific issue (by primary key / ID)
     path("<int:pk>/", views.issue_detail, name="issue_detail"),
 
