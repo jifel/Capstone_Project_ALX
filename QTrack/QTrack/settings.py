@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     # api      -> DRF endpoints in Week 3
     # core     -> shared helpers/utilities (optional)
     "tracker",
-    "users",
+    "users.apps.UsersConfig",
     "api",
     "core",
 

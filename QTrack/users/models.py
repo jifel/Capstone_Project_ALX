@@ -10,6 +10,23 @@ class CustomUser(AbstractUser):
     #keep username as unique too but optional at signup
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
 
+    #role choices..users select role on signup
+    ROLE_CHOICES = [
+        ('qa', 'QA Agent'),
+        ('dev', 'Developer'),
+    ]
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='qa',
+        blank=True,
+        null=True,
+        help_text="Select role: QA Agent or Developer",
+
+
+    )
+
     #Tell django to use email as the primary login field
     USERNAME_FIELD = 'email'
 
@@ -17,5 +34,5 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ['username','first_name','last_name']
 
     def __str__(self):
-        #display email when printing user object
+        #display email when printing user object...shows a friendly identifier in admin/shell
         return self.email

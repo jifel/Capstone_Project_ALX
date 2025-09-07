@@ -38,9 +38,12 @@
         </div>
 
         <div class="col-md-3">
-            <label for="reporter" class="form-label fw-semibold">Reporter</label>
-            <input type="text" id="reporter" name="reporter" 
-                   value="{{ request.GET.reporter }}" class="form-control" placeholder="Search by reporter...">
+            <label for="assigned" class="form-label fw-semibold">Assigned</label>
+            <select id="assigned" name="assigned" class="form-select">
+                <option value="">All</option>
+                <option value="yes" {% if request.GET.assigned == "yes" %}selected{% endif %}>Assigned</option>
+                <option value="no" {% if request.GET.assigned == "no" %}selected{% endif %}>Unassigned</option>
+            </select>
         </div>
 
         <div class="col-md-3 d-flex align-items-end">
@@ -61,7 +64,11 @@
                         <th class="py-3">Status</th>
                         <th class="py-3">Priority</th>
                         <th class="py-3">Reporter</th>
+                        <th class="py-3">Assigned To</th>
                         <th class="py-3">Created</th>
+                        {% if user.role == "qa" or user.role == "admin" %}
+                            <th class="py-3">Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -92,11 +99,26 @@
                             {% endif %}
                         </td>
                         <td>{{ issue.reporter.username }}</td>
+                        <td>
+                            {% if issue.assignee %}
+                                {{ issue.assignee.get_full_name|default:issue.assignee.username }}
+                            {% else %}
+                                <span class="text-muted">Unassigned</span>
+                            {% endif %}
+                        </td>
                         <td class="text-muted">{{ issue.created_at|date:"Y-m-d H:i" }}</td>
+                        {% if user.role == "qa" or user.role == "admin" %}
+                        <td>
+                            <a href="{% url 'issue_assign' issue.pk %}" 
+                               class="btn btn-sm btn-outline-success {% if issue.assignee %}disabled{% endif %}">
+                                Assign
+                            </a>
+                        </td>
+                        {% endif %}
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">No issues found.</td>
+                        <td colspan="9" class="text-center text-muted py-4">No issues found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

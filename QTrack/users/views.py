@@ -1,26 +1,32 @@
-# users/views.py
-from django.contrib.auth.forms import UserCreationForm  # Django's built-in signup form
 from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
-def signup(request):
+def signup_view(request):
     """
-    User Signup View:
-    - Handles user registration.
-    - On GET: displays a blank signup form.
-    - On POST: validates and creates a new user.
-    - After successful signup, redirects to splash page (for login).
+    Handle signup with email, names, role, and password.
     """
     if request.method == "POST":
-        # Bind submitted form data to UserCreationForm
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            # Save new user to database
-            form.save()
-            # Redirect back to splash page for login
-            return redirect("splash")
+            user = form.save()
+            login(request, user)  # auto login after signup
+            return redirect("dashboard")
     else:
-        # If GET request, show empty signup form
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
+    return render(request, "users/signup.html", {"form": form})
 
-    # Render signup template with form
-    return render(request, "registration/signup.html", {"form": form})
+
+def login_view(request):
+    """
+    Handle login with email + password.
+    """
+    if request.method == "POST":
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("dashboard")
+    else:
+        form = CustomAuthenticationForm()
+    return render(request, "users/login.html", {"form": form})

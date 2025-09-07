@@ -2,39 +2,65 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django.contrib.auth import login
+from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
+from .forms import AssignIssueForm
 from .models import Issue
 from .forms import IssueForm
 import csv
 from django.http import HttpResponse
 
 
-#view to list all issues
+@login_required
 def issue_list(request):
     """
-    Show list of issues in HTML, with filtering options.
-    Filters mimic API filter fields for consistency.
+    Show list of issues with role-based filtering:
+    - QA/Admins see all issues
+    - Developers see only issues assigned to them
     """
     issues = Issue.objects.all()
 
-    # Get filter parameters from the request
-    status = request.GET.get('status')
-    priority = request.GET.get('priority')
-    reporter = request.GET.get('reporter')  # optional filter by reporter
+    # Role-based restriction
+    if getattr(request.user, "role", None) == "developer":
+        issues = issues.filter(assignee=request.user)
 
-    # Apply filters if provided
+    # Apply filters
+    status = request.GET.get("status")
+    priority = request.GET.get("priority")
+    reporter = request.GET.get("reporter")
+    assigned = request.GET.get("assigned")  # <-- NEW
+
     if status:
         issues = issues.filter(status=status)
     if priority:
         issues = issues.filter(priority=priority)
     if reporter:
         issues = issues.filter(reporter__username__icontains=reporter)
+    if assigned == "yes":
+        issues = issues.exclude(assignee__isnull=True)
+    elif assigned == "no":
+        issues = issues.filter(assignee__isnull=True)
 
-    return render(request, 'tracker/issue_list.html', {"issues": issues})
+    return render(request, "tracker/issue_list.html", {"issues": issues})
+
+
 
 #view to show details of one issue
 def issue_detail(request, pk):
     issue = get_object_or_404(Issue, pk=pk)
-    return render(request, 'tracker/issue_detail.html', {'issue': issue})
+
+    # Check role or group membership in Python (cleaner than template logic)
+    is_qa = (
+        getattr(request.user, "role", None) in ["qa", "admin"]
+        or request.user.groups.filter(name__in=["QA", "Admin"]).exists()
+    )
+
+    return render(
+        request,
+        "tracker/issue_detail.html",
+        {"issue": issue, "is_qa": is_qa}
+    )
+
 
 
 #view to create a new issue
@@ -53,19 +79,23 @@ def issue_create(request):
     return render(request, 'tracker/issue_form.html',{'form': form})    
 
 #dashboard view - show summary stats(total issues, open issues, closed issues)
+@login_required
 def dashboard(request):
-    total_issues = Issue.objects.count()
-    open_issues = Issue.objects.filter(status='open').count()
-    closed_issues = Issue.objects.filter(status='closed').count()
+    user = request.user
+
+    if user.role in ["qa", "admin"]:
+        # Global stats for QA and Admin
+        issues = Issue.objects.all()
+    else:
+        # Developers only see their assigned issues
+        issues = Issue.objects.filter(assignee=user)
 
     context = {
-        'total_issues': total_issues,
-        'open_issues': open_issues,
-        'closed_issues': closed_issues,
+        "total_issues": issues.count(),
+        "open_issues": issues.filter(status="open").count(),
+        "closed_issues": issues.filter(status="closed").count(),
     }
-
-    return render(request, 'tracker/dashboard.html', context)
-
+    return render(request, "tracker/dashboard.html", context)
 
 
 
@@ -127,3 +157,40 @@ def splash(request):
 
     # Render the splash page with login form (GET request or invalid form)
     return render(request, "tracker/splash.html", {"form": form})
+
+
+# view to assign issue
+
+@login_required
+def issue_assign(request, pk):
+    """
+    Allow only QA/Admins to assign an issue to a developer.
+    Developers should not access this.
+    """
+    issue = get_object_or_404(Issue, pk=pk)
+
+    # Only QA/Admins can assign
+    if request.user.role not in ["qa", "admin"] and not request.user.groups.filter(name__in=["QA", "Admin"]).exists():
+        raise PermissionDenied("You are not allowed to assign issues.")
+
+    if request.method == "POST":
+        form = AssignIssueForm(request.POST, instance=issue)
+        if form.is_valid():
+            form.save()
+            #redirect to unassigned issues list after assigning
+            return redirect("unassigned_issues")
+    else:
+        form = AssignIssueForm(instance=issue)
+
+    return render(request, "tracker/assign_issue.html", {"form": form, "issue": issue})
+
+#view for filtered unassigned issues
+@login_required
+def unassigned_issues(request):
+    """Show only unassigned issues for QA/Admins."""
+    issues = Issue.objects.filter(assignee__isnull=True)
+
+    context = {
+        "issues": issues,
+    }
+    return render(request, "tracker/unassigned_issues.html", context)

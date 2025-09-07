@@ -1,10 +1,19 @@
 {% extends "base.html" %}
 
-{% block content %}
-    <h1>{{ issue.title }}</h1>
-    <p>{{ issue.description }}</p>
-    <p>Status: {{ issue.status }}</p>
-    <p>Priority: {{ issue.priority }}</p>
+{% block title %}Issue Details{% endblock %}
 
-    <a href="{% url 'issue_list' %}">Back to list</a>
+{% block content %}
+  <h2>{{ issue.title }}</h2>
+  <p>{{ issue.description }}</p>
+  <p>Status: {{ issue.status }}</p>
+  <p>Priority: {{ issue.priority }}</p>
+  <p>Reporter: {{ issue.reporter }}</p>
+  <p>Assignee: {{ issue.assignee|default:"Unassigned" }}</p>
+
+  {% if user.is_authenticated and is_qa %}
+    <!-- Only QA/Admins see this -->
+    <a href="{% url 'issue_assign' issue.pk %}" class="btn btn-primary">
+      Assign Issue
+    </a>
+  {% endif %}
 {% endblock %}

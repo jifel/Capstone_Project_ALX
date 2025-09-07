@@ -75,6 +75,11 @@ class Issue(models.Model):
             models.Index(fields=["status", "priority"]),
             models.Index(fields=["created_at"]),
         ]
+        #custom permission that allows a user(QA) to assign issues
+
+        permissions = [
+            ('ca_assign_issue','Can assign issue to developers')
+        ]
 
     def __str__(self):
         # Nice string in admin/lists

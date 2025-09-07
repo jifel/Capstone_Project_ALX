@@ -15,11 +15,20 @@ urlpatterns = [
     #create a new issue via form
     path("new/", views.issue_create, name="issue_create"),
 
+    #assign an issue
+    path("<int:pk>/assign/", views.issue_assign, name = 'issue_assign'),
+
+    #unassigned issue
+    path("unassigned/", views.unassigned_issues, name="unassigned_issues"),
+
+
     #export all issues as a CSV file (download)
     path("export/csv/", views.export_issues_csv, name="export_issues_csv"),
 
     #splash/landing page (separate route instead of root)
     path("home/",views.splash, name= "splash"), #homepage
+
+
 
     
 ]

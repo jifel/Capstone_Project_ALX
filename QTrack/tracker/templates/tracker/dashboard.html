@@ -45,9 +45,19 @@
             <a href="{% url 'issue_create' %}" class="btn btn-outline-primary btn-lg">
                 + Add New Issue
             </a>
-            <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
-                View All Issues
-            </a>
+
+            {% if user.role == "qa" or user.role == "admin" %}
+                <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
+                    View All Issues
+                </a>
+                <a href="{% url 'unassigned_issues' %}" class="btn btn-outline-success btn-lg">
+                    Assign Issues
+                </a>
+            {% else %}
+                <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary btn-lg">
+                    View My Issues
+                </a>
+            {% endif %}
         </div>
     </div>
 </div>

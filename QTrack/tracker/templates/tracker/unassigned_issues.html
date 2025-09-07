@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Unassigned Issues | QTrack{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Unassigned Issues</h2>
+
+    {% if issues %}
+        <ul class="list-group">
+            {% for issue in issues %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'issue_detail' issue.pk %}" class="fw-bold text-decoration-none">
+                            {{ issue.title }}
+                        </a>
+                        <p class="mb-0 text-muted small">{{ issue.description|truncatechars:80 }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'issue_assign' issue.pk %}" class="btn btn-sm btn-outline-primary">
+                            Assign
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info">
+            🎉 All issues are assigned! Nothing pending here.
+        </div>
+    {% endif %}
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
